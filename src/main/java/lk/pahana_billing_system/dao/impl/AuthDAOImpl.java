@@ -11,6 +11,7 @@ import java.sql.SQLException;
 public class AuthDAOImpl implements AuthDAO {
     @Override
     public User findUserByUsernameAndPassword(String username, String password) throws SQLException {
+        System.out.println("username : "+ username + "password : " + password);
         String query = "SELECT * FROM users WHERE username = ? AND password = ?";
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(query)) {
@@ -21,7 +22,10 @@ public class AuthDAOImpl implements AuthDAO {
                     User user = new User();
                     user.setId(rs.getInt("id"));
                     user.setUsername(rs.getString("username"));
+                    System.out.println("Authentication successful for user: {}"+ username);
                     return user;
+                } else {
+                    System.out.println("Authentication failed for user: {}"+ username);
                 }
             }
         }

@@ -100,11 +100,10 @@ public class OrderController extends HttpServlet{
         String customerId = payload.getCustomerId();
         List<OrderDetailDTO> orderDetailDTOs = payload.getOrderDetails();
 
-        // Convert List<OrderDetailDTO> to List<OrderDetail>
         List<OrderDetail> orderDetails = new ArrayList<>();
         for (OrderDetailDTO dto : orderDetailDTOs) {
             OrderDetail orderDetail = new OrderDetail();
-            orderDetail.setOrderId(""); // Order ID will be set in service layer
+            orderDetail.setOrderId("");
             orderDetail.setItemCode(dto.getItemCode());
             orderDetail.setQty(dto.getQty());
             orderDetail.setUnitPrice(dto.getUnitPrice());

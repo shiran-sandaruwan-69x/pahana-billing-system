@@ -11,6 +11,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public User authenticateUser(String username, String password) throws SQLException {
+        System.out.println("step 2 username"+ username + "password : "+ password);
         return authDAO.findUserByUsernameAndPassword(username, password);
     }
 }
