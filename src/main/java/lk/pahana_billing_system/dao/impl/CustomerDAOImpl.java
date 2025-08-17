@@ -81,6 +81,7 @@ public class CustomerDAOImpl implements CustomerDAO {
                 customer.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
                 customers.add(customer);
             }
+            System.out.println("customers mm : "+ customers.toString());
         } catch (SQLException e) {
             e.printStackTrace();
         }

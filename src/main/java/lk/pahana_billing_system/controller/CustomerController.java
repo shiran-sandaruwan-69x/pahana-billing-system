@@ -16,6 +16,7 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import java.io.BufferedReader;
 
 @WebServlet(name = "CustomerController", urlPatterns = {
         "/customers",
@@ -34,12 +35,6 @@ public class CustomerController extends HttpServlet{
 
         try {
             switch (action) {
-                case "/customers/add":
-                    showAddForm(request, response);
-                    break;
-                case "/customers/edit":
-                    showEditForm(request, response);
-                    break;
                 case "/customers/delete":
                     deleteCustomer(request, response);
                     break;
@@ -77,58 +72,43 @@ public class CustomerController extends HttpServlet{
         }
     }
 
-    private void listCustomers(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    private void listCustomers(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         PrintWriter out = response.getWriter();
+
         List<CustomerDTO> customers = customerService.getAllCustomers();
-        out.write(gson.toJson(new HashMap<String, List<CustomerDTO>>() {{ put("customers", customers); }}));
+
+        if (customers == null) {
+            customers = java.util.Collections.emptyList();
+        }
+
+        HashMap<String, Object> responseMap = new HashMap<>();
+        responseMap.put("customers", customers);
+
+        String jsonResponse = gson.toJson(responseMap);
+        out.write(jsonResponse);
         out.flush();
     }
 
-    private void showAddForm(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        // Not used by React frontend, but kept for compatibility
-        response.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED, "Add form not supported in JSON API");
-    }
-
-    private void showEditForm(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        String id = request.getParameter("id");
-        if (id == null || id.trim().isEmpty()) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write("{\"error\": \"Invalid customer ID\"}");
-            return;
-        }
-
-        Customer existingCustomer = customerService.getCustomerDetails(id);
-        if (existingCustomer != null) {
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            PrintWriter out = response.getWriter();
-            out.write(gson.toJson(existingCustomer));
-            out.flush();
-        } else {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            response.getWriter().write("{\"error\": \"Customer not found\"}");
-        }
-    }
-
     private void addCustomer(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        Customer customer = new Customer();
+            throws IOException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        StringBuilder sb = new StringBuilder();
+        String line;
+        try (BufferedReader reader = request.getReader()) {
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+            }
+        }
+
+        Customer customer = gson.fromJson(sb.toString(), Customer.class);
         customer.setCustomerId(UUID.randomUUID().toString().substring(0, 6));
-        customer.setName(request.getParameter("name"));
-        customer.setEmail(request.getParameter("email"));
-        customer.setPhone(request.getParameter("phone"));
-        customer.setAddress(request.getParameter("address"));
-        customer.setAccountNo(request.getParameter("accountNo"));
 
         boolean isAdded = customerService.registerCustomer(customer);
 
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
         PrintWriter out = response.getWriter();
         if (isAdded) {
             response.setStatus(HttpServletResponse.SC_OK);
@@ -141,26 +121,28 @@ public class CustomerController extends HttpServlet{
     }
 
     private void updateCustomer(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        String id = request.getParameter("id");
-        if (id == null || id.trim().isEmpty()) {
+            throws IOException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        StringBuilder sb = new StringBuilder();
+        String line;
+        try (BufferedReader reader = request.getReader()) {
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+            }
+        }
+
+        Customer customer = gson.fromJson(sb.toString(), Customer.class);
+
+        if (customer.getCustomerId() == null || customer.getCustomerId().trim().isEmpty()) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write("{\"error\": \"Invalid customer ID\"}");
             return;
         }
 
-        Customer customer = new Customer();
-        customer.setCustomerId(id);
-        customer.setName(request.getParameter("name"));
-        customer.setEmail(request.getParameter("email"));
-        customer.setPhone(request.getParameter("phone"));
-        customer.setAddress(request.getParameter("address"));
-        customer.setAccountNo(request.getParameter("accountNo"));
-
         boolean isUpdated = customerService.updateCustomerDetails(customer);
 
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
         PrintWriter out = response.getWriter();
         if (isUpdated) {
             response.setStatus(HttpServletResponse.SC_OK);
@@ -171,6 +153,7 @@ public class CustomerController extends HttpServlet{
         }
         out.flush();
     }
+
 
     private void deleteCustomer(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {

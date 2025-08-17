@@ -1,5 +1,6 @@
 package lk.pahana_billing_system.service.impl;
 
+import com.google.gson.Gson;
 import lk.pahana_billing_system.dao.CustomerDAO;
 import lk.pahana_billing_system.dao.impl.CustomerDAOImpl;
 import lk.pahana_billing_system.dto.CustomerDTO;
@@ -24,7 +25,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public List<CustomerDTO> getAllCustomers() {
-        return customerDAO.getAllCustomers().stream()
+         List<CustomerDTO> customers = customerDAO.getAllCustomers().stream()
                 .map(customer -> {
                     CustomerDTO dto = new CustomerDTO();
                     dto.setCustomerId(customer.getCustomerId());
@@ -37,6 +38,8 @@ public class CustomerServiceImpl implements CustomerService {
                     return dto;
                 })
                 .collect(Collectors.toList());
+        System.out.println("test : "+ new Gson().toJson(customers));
+        return customers;
     }
 
     @Override
