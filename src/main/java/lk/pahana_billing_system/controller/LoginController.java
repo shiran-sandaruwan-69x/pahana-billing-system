@@ -55,15 +55,4 @@ public class LoginController extends HttpServlet{
                 response.getWriter().write(gson.toJson(new Response("An error occurred during login: " + e.getMessage(), false)));
             }
     }
-
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String action = request.getServletPath();
-        if ("/logout".equals(action)) {
-            request.getSession().invalidate();
-            response.sendRedirect(request.getContextPath() + "/login.jsp");
-        } else if ("/login".equals(action)) {
-            RequestDispatcher dispatcher = request.getRequestDispatcher("/login.jsp");
-            dispatcher.forward(request, response);
-        }
-    }
 }
