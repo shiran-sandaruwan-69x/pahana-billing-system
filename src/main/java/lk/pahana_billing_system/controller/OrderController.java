@@ -100,16 +100,6 @@ public class OrderController extends HttpServlet{
         String customerId = payload.getCustomerId();
         List<OrderDetailDTO> orderDetailDTOs = payload.getOrderDetails();
 
-        List<OrderDetail> orderDetails = new ArrayList<>();
-        for (OrderDetailDTO dto : orderDetailDTOs) {
-            OrderDetail orderDetail = new OrderDetail();
-            orderDetail.setOrderId("");
-            orderDetail.setItemCode(dto.getItemCode());
-            orderDetail.setQty(dto.getQty());
-            orderDetail.setUnitPrice(dto.getUnitPrice());
-            orderDetails.add(orderDetail);
-        }
-
         String orderId = UUID.randomUUID().toString().substring(0, 6);
         java.util.Date utilDate = new java.util.Date();
         Date sqlDate = new Date(utilDate.getTime());
@@ -118,6 +108,16 @@ public class OrderController extends HttpServlet{
         order.setOrderId(orderId);
         order.setCustomerId(customerId);
         order.setDate(sqlDate);
+
+        List<OrderDetail> orderDetails = new ArrayList<>();
+        for (OrderDetailDTO dto : orderDetailDTOs) {
+            OrderDetail orderDetail = new OrderDetail();
+            orderDetail.setOrderId(orderId);
+            orderDetail.setItemCode(dto.getItemCode());
+            orderDetail.setQty(dto.getQty());
+            orderDetail.setUnitPrice(dto.getUnitPrice());
+            orderDetails.add(orderDetail);
+        }
 
         boolean success = orderService.placeOrder(order, orderDetails);
 
