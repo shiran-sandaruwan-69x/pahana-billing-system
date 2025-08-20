@@ -23,9 +23,7 @@ import java.io.PrintWriter;
 import java.lang.reflect.Type;
 import java.sql.Date;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @WebServlet(name = "OrderController", urlPatterns = {
         "/orders",
@@ -74,13 +72,17 @@ public class OrderController extends HttpServlet{
         }
     }
 
-    private void listOrders(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        PrintWriter out = response.getWriter();
+    private void listOrders(HttpServletRequest request, HttpServletResponse response)
+            throws SQLException, IOException {
         List<Order> orders = orderService.getAllOrders();
-        out.write(gson.toJson(new java.util.HashMap<String, List<Order>>() {{ put("orders", orders); }}));
-        out.flush();
+        if (orders == null) {
+            orders = Collections.emptyList();
+        }
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("orders", orders);
+
+        response.setStatus(HttpServletResponse.SC_OK);
+        writeJson(response, responseMap);
     }
 
     private void placeOrderJson(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
@@ -180,4 +182,13 @@ public class OrderController extends HttpServlet{
         out.write(gson.toJson(bill));
         out.flush();
     }
+
+    private void writeJson(HttpServletResponse response, Object data) throws IOException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        PrintWriter out = response.getWriter();
+        out.write(gson.toJson(data));
+        out.flush();
+    }
+
 }
