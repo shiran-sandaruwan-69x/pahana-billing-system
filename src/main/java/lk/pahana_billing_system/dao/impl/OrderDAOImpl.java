@@ -41,7 +41,10 @@ public class OrderDAOImpl implements OrderDAO {
     @Override
     public List<Order> getAllOrders() throws SQLException {
         List<Order> orders = new ArrayList<>();
-        String sql = "SELECT * FROM Orders ORDER BY date DESC";
+        String sql = "SELECT o.orderId, o.date, o.customerId, c.name AS customerName " +
+                "FROM Orders o " +
+                "JOIN Customer c ON o.customerId = c.customerId " +
+                "ORDER BY o.date DESC";
         try (Connection conn = DBConnection.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
@@ -50,6 +53,7 @@ public class OrderDAOImpl implements OrderDAO {
                 order.setOrderId(rs.getString("orderId"));
                 order.setDate(rs.getDate("date"));
                 order.setCustomerId(rs.getString("customerId"));
+                order.setCustomerName(rs.getString("customerName"));
                 orders.add(order);
             }
         }
