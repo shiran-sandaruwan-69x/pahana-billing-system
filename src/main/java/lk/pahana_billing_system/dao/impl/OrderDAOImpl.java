@@ -5,22 +5,20 @@ import lk.pahana_billing_system.model.Order;
 import lk.pahana_billing_system.model.OrderDetail;
 import lk.pahana_billing_system.utility.DBConnection;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 public class OrderDAOImpl implements OrderDAO {
     @Override
     public boolean addOrder(Order order) throws SQLException {
-        String sql = "INSERT INTO Orders (orderId, date, customerId) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO Orders (orderId, date, customerId, created_at) VALUES (?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, order.getOrderId());
             stmt.setDate(2, order.getDate());
             stmt.setString(3, order.getCustomerId());
+            stmt.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now()));
             return stmt.executeUpdate() > 0;
         }
     }
@@ -44,7 +42,7 @@ public class OrderDAOImpl implements OrderDAO {
         String sql = "SELECT o.orderId, o.date, o.customerId, c.name AS customerName " +
                 "FROM Orders o " +
                 "JOIN Customer c ON o.customerId = c.customerId " +
-                "ORDER BY o.date DESC";
+                "ORDER BY o.created_at DESC";
         try (Connection conn = DBConnection.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
@@ -54,6 +52,7 @@ public class OrderDAOImpl implements OrderDAO {
                 order.setDate(rs.getDate("date"));
                 order.setCustomerId(rs.getString("customerId"));
                 order.setCustomerName(rs.getString("customerName"));
+               // order.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
                 orders.add(order);
             }
         }

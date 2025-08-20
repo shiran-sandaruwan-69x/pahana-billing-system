@@ -75,6 +75,7 @@ public class OrderController extends HttpServlet{
     private void listOrders(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, IOException {
         List<Order> orders = orderService.getAllOrders();
+        System.out.println("orders"+ orders.toString());
         if (orders == null) {
             orders = Collections.emptyList();
         }
@@ -107,6 +108,7 @@ public class OrderController extends HttpServlet{
         Date sqlDate = new Date(utilDate.getTime());
 
         Order order = new Order();
+        System.out.println("order"+ order);
         order.setOrderId(orderId);
         order.setCustomerId(customerId);
         order.setDate(sqlDate);
